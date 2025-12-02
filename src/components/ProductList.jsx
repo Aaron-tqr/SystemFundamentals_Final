@@ -9,11 +9,14 @@ export default function ProductList() {
     return saved ? JSON.parse(saved) : defaultProducts;
   });
 
+  // filter state was missing in your snippet; add it here
+  const [filter, setFilter] = useState("All");
+
   useEffect(() => {
     localStorage.setItem("products_v1", JSON.stringify(products));
   }, [products]);
 
-  // replace functions that mutate products to update setProducts accordingly
+  // quantity controls
   function handleIncrease(id) {
     setProducts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p))
@@ -28,6 +31,31 @@ export default function ProductList() {
   }
   function handleAddToCart(product) {
     alert(`${product.name} added to cart`);
+  }
+
+  // CSV export function goes here. It uses the `products` array above.
+  function downloadCSV() {
+    const rows = [
+      ["id", "name", "category", "price", "quantity", "subtotal"],
+      ...products.map((p) => [
+        p.id,
+        p.name,
+        p.category,
+        p.price,
+        p.quantity,
+        p.price * p.quantity,
+      ]),
+    ];
+    const csv = rows
+      .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "products_export.csv";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   const filtered =
@@ -67,10 +95,21 @@ export default function ProductList() {
             ))}
           </select>
         </div>
+
+        {/* Right-side controls: Add and Export buttons */}
         <div>
           <Link to="/add" className="button">
             Add New Product
           </Link>
+
+          {/* Export button placed next to Add New Product */}
+          <button
+            className="button"
+            onClick={downloadCSV}
+            style={{ marginLeft: 12 }}
+          >
+            Export CSV
+          </button>
         </div>
       </div>
 
