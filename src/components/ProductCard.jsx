@@ -15,6 +15,11 @@ export default function ProductCard({
       <img src={product.image} alt={product.name} />
       <div className="card-body">
         <h3>{product.name}</h3>
+
+        {lowStock && (
+          <div style={{ color: "#b91c1c", fontWeight: 700 }}>Low Stock</div>
+        )}
+
         <p className="small">{product.category}</p>
         <p className="price">₱{product.price.toLocaleString()}</p>
         <p className="small">Quantity: {product.quantity}</p>
@@ -24,9 +29,11 @@ export default function ProductCard({
           <button className="button" onClick={() => onDecrease(product.id)}>
             -
           </button>
+
           <button className="button" onClick={() => onIncrease(product.id)}>
             +
           </button>
+
           <Link
             to={`/products/${product.id}`}
             className="button"
@@ -34,6 +41,7 @@ export default function ProductCard({
           >
             Details
           </Link>
+
           <button
             onClick={() => onAdd(product)}
             style={{ marginLeft: 8 }}
