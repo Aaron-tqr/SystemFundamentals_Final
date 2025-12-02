@@ -1,30 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import defaultProducts from "../data/defaultProducts";
 import ProductCard from "./ProductCard";
 import { Link } from "react-router-dom";
 
 export default function ProductList() {
-  const [products, setProducts] = useState(defaultProducts);
-  const [filter, setFilter] = useState("All");
+  const [products, setProducts] = useState(() => {
+    const saved = localStorage.getItem("products_v1");
+    return saved ? JSON.parse(saved) : defaultProducts;
+  });
 
+  useEffect(() => {
+    localStorage.setItem("products_v1", JSON.stringify(products));
+  }, [products]);
+
+  // replace functions that mutate products to update setProducts accordingly
   function handleIncrease(id) {
-    setProducts(
-      products.map((p) =>
-        p.id === id ? { ...p, quantity: p.quantity + 1 } : p
-      )
+    setProducts((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p))
     );
   }
-
   function handleDecrease(id) {
-    setProducts(
-      products.map((p) =>
+    setProducts((prev) =>
+      prev.map((p) =>
         p.id === id ? { ...p, quantity: Math.max(0, p.quantity - 1) } : p
       )
     );
   }
-
   function handleAddToCart(product) {
-    // For prototype: simple alert + could implement cart later
     alert(`${product.name} added to cart`);
   }
 
