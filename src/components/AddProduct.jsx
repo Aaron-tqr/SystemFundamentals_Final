@@ -21,14 +21,28 @@ export default function AddProduct() {
 
   function handleSubmit(e) {
     e.preventDefault();
-    // validation check - simple
+
+    // required fields
+    const required = ["name", "category", "price", "quantity", "image"];
+
+    // ✅ PUT IT HERE (validation block)
+    for (let field of required) {
+      if (!form[field]) {
+        alert(`Please fill the required field: ${field}`);
+        return;
+      }
+    }
+
     const stored = JSON.parse(localStorage.getItem("products_v1") || "[]");
+
     const highest = stored.length
       ? Math.max(...stored.map((p) => p.id))
       : defaultProducts.length
       ? Math.max(...defaultProducts.map((p) => p.id))
       : 0;
+
     const newId = highest + 1;
+
     const newProduct = {
       id: newId,
       name: form.name,
@@ -40,8 +54,11 @@ export default function AddProduct() {
       specs: form.specs,
       rating: Number(form.rating) || 0,
     };
+
     const next = [...(stored.length ? stored : defaultProducts), newProduct];
+
     localStorage.setItem("products_v1", JSON.stringify(next));
+
     alert("Product added and saved locally. Redirecting to home.");
     navigate("/");
   }
