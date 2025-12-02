@@ -1,0 +1,26 @@
+import React from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import ProductList from "./components/ProductList";
+import ProductDetail from "./components/ProductDetail";
+import AddProduct from "./components/AddProduct";
+
+function App() {
+  return (
+    <div className="container">
+      <header className="header">
+        <h1>Product Management App</h1>
+        <p className="small">
+          Pre-Final Exam • CCDI Sorsogon — Prince Aaron John Tuquero
+        </p>
+      </header>
+
+      <Routes>
+        <Route path="/" element={<ProductList />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
+        <Route path="/add" element={<AddProduct />} />
+      </Routes>
+    </div>
+  );
+}
+
+export default App;
