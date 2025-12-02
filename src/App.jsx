@@ -19,6 +19,9 @@ function App() {
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/add" element={<AddProduct />} />
       </Routes>
+      <footer className="footer">
+        © {new Date().getFullYear()} CCDI • Product Management App
+      </footer>
     </div>
   );
 }
