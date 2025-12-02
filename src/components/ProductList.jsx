@@ -9,14 +9,12 @@ export default function ProductList() {
     return saved ? JSON.parse(saved) : defaultProducts;
   });
 
-  // filter state was missing in your snippet; add it here
   const [filter, setFilter] = useState("All");
 
   useEffect(() => {
     localStorage.setItem("products_v1", JSON.stringify(products));
   }, [products]);
 
-  // quantity controls
   function handleIncrease(id) {
     setProducts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p))
@@ -33,7 +31,6 @@ export default function ProductList() {
     alert(`${product.name} added to cart`);
   }
 
-  // CSV export function goes here. It uses the `products` array above.
   function downloadCSV() {
     const rows = [
       ["id", "name", "category", "price", "quantity", "subtotal"],
