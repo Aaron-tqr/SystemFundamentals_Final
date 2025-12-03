@@ -10,7 +10,7 @@ function App() {
       <header className="header">
         <h1>Product Management App</h1>
         <p className="small">
-          Pre-Final Exam • CCDI Sorsogon — Prince Aaron John Tuquero
+          Final Exam • CCDI Sorsogon — Prince Aaron John Tuquero
         </p>
       </header>
 
