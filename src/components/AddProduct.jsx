@@ -25,7 +25,6 @@ export default function AddProduct() {
     // required fields
     const required = ["name", "category", "price", "quantity", "image"];
 
-    // ✅ PUT IT HERE (validation block)
     for (let field of required) {
       if (!form[field]) {
         alert(`Please fill the required field: ${field}`);
