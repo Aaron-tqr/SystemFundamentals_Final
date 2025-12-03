@@ -5,42 +5,95 @@ import { Link } from "react-router-dom";
 
 export default function ProductList() {
   const [products, setProducts] = useState(() => {
-    const saved = localStorage.getItem("products_v1");
-    return saved ? JSON.parse(saved) : defaultProducts;
+    try {
+      const saved = localStorage.getItem("products_v1");
+      if (!saved) return defaultProducts;
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed)) return defaultProducts;
+      return parsed;
+    } catch (err) {
+      console.error("Failed to parse products_v1 from localStorage:", err);
+      try {
+        localStorage.removeItem("products_v1");
+      } catch (e) {}
+      return defaultProducts;
+    }
   });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("products_v1", JSON.stringify(products));
+    } catch (err) {
+      console.error("Failed to save products_v1 to localStorage:", err);
+    }
+  }, [products]);
 
   const [filter, setFilter] = useState("All");
 
-  useEffect(() => {
-    localStorage.setItem("products_v1", JSON.stringify(products));
-  }, [products]);
+  // Remove totally invalid items here before using them
+  const safeProducts = products.filter((p) => {
+    if (!p || typeof p !== "object") return false;
+    // price and quantity must be finite numbers
+    const price = Number(p.price);
+    const qty = Number(p.quantity);
+    if (!Number.isFinite(price) || !Number.isFinite(qty)) {
+      console.warn("Dropping invalid product from render:", p);
+      return false;
+    }
+    return true;
+  });
 
+  const categories = [
+    "All",
+    ...Array.from(
+      new Set(safeProducts.map((p) => p.category || "Uncategorized"))
+    ),
+  ];
+  const filtered =
+    filter === "All"
+      ? safeProducts
+      : safeProducts.filter((p) => (p.category || "Uncategorized") === filter);
+
+  const overallTotal = safeProducts.reduce((sum, p) => {
+    const price = Number(p.price) || 0;
+    const qty = Number(p.quantity) || 0;
+    return sum + price * qty;
+  }, 0);
+
+  // handlers (increase/decrease/add) should update the full products list (not only safeProducts)
   function handleIncrease(id) {
     setProducts((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p))
-    );
-  }
-  function handleDecrease(id) {
-    setProducts((prev) =>
       prev.map((p) =>
-        p.id === id ? { ...p, quantity: Math.max(0, p.quantity - 1) } : p
+        p && p.id === id ? { ...p, quantity: (Number(p.quantity) || 0) + 1 } : p
       )
     );
   }
+
+  function handleDecrease(id) {
+    setProducts((prev) =>
+      prev.map((p) =>
+        p && p.id === id
+          ? { ...p, quantity: Math.max(0, (Number(p.quantity) || 0) - 1) }
+          : p
+      )
+    );
+  }
+
   function handleAddToCart(product) {
     alert(`${product.name} added to cart`);
   }
 
+  // CSV export should use safeProducts
   function downloadCSV() {
     const rows = [
       ["id", "name", "category", "price", "quantity", "subtotal"],
-      ...products.map((p) => [
+      ...safeProducts.map((p) => [
         p.id,
         p.name,
         p.category,
         p.price,
         p.quantity,
-        p.price * p.quantity,
+        (Number(p.price) || 0) * (Number(p.quantity) || 0),
       ]),
     ];
     const csv = rows
@@ -54,18 +107,6 @@ export default function ProductList() {
     a.click();
     URL.revokeObjectURL(url);
   }
-
-  const filtered =
-    filter === "All" ? products : products.filter((p) => p.category === filter);
-  const overallTotal = products.reduce(
-    (sum, p) => sum + p.price * p.quantity,
-    0
-  );
-
-  const categories = [
-    "All",
-    ...Array.from(new Set(products.map((p) => p.category))),
-  ];
 
   return (
     <>
@@ -92,14 +133,10 @@ export default function ProductList() {
             ))}
           </select>
         </div>
-
-        {/* Right-side controls: Add and Export buttons */}
         <div>
           <Link to="/add" className="button">
             Add New Product
           </Link>
-
-          {/* Export button placed next to Add New Product */}
           <button
             className="button"
             onClick={downloadCSV}
